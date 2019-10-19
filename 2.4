@@ -1,0 +1,71 @@
+import pandas as pd
+from sklearn.model_selection import GridSearchCV, cross_val_score
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+from sklearn.svm import SVC
+from sklearn.model_selection import KFold
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+from sklearn.tree import export_graphviz
+from sklearn.externals.six import StringIO
+from IPython.display import Image
+import pydotplus
+from sklearn.model_selection import cross_val_score
+
+col_names = ['label', 'alcohol', 'acid', 'ash', 'alcalinity', 'magnesium', 'phenols', 'flavoids', 'nonflavoids', 'proanthocyanins', 'color', 'hue', 'OD', 'Proline']
+Cdata = pd.read_csv("wine.data", header=None, names=col_names)
+
+
+X = Cdata.values[:, 1:12]
+Y = Cdata.values[:,0]
+
+svm = SVC(kernel="rbf")
+
+non_nested_scores = np.zeros(30)
+nested_scores = np.zeros(30)
+
+for i in range(30):
+  inner_cv = KFold(n_splits=4, shuffle=True, random_state=i)
+  outer_cv = KFold(n_splits=4, shuffle=True, random_state=i)
+
+  clf = GridSearchCV(estimator=svm, param_grid=p_grid,cv=inner_cv, iid=False)
+  clf.fit(X,Y)
+  non_nested_scores[i] = clf.best_score_
+
+  nested_score = cross_val_score(clf, X=X, Y=Y, cv=outer_cv)
+  nested_scires[i] = nested_score.mean()
+
+score_difference = non_nested_scores - non_nested_scores
+
+
+
+
+
+
+
+
+sc = StandardScaler()
+X_std = sc.fit_transform(X)
+
+C_candidates = dict(C=np.logspcae(-4, 4, 10))
+
+clf = GridSearchCV(estimator=SVC(), param_grid=C_candidates)
+
+clf.fit(X_std, Y)
+clf.best_estimator_.C
+
+cross_val_score(clf, X_std, y)
+
+
+
+
+print("Accuracy:",metrics.accuracy_score(Y_test, Y_pred))
+
+
+dot_data = StringIO()
+export_graphviz(tree, out_file=dot_data,
+                filled=True, rounded=True,
+                special_characters=True)
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+graph.write_png("Tree4.png")

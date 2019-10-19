@@ -1,0 +1,36 @@
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+from sklearn.tree import export_graphviz
+from sklearn.externals.six import StringIO
+from IPython.display import Image
+import pydotplus
+
+col_names = ['label', 'alcohol', 'acid', 'ash', 'alcalinity', 'magnesium', 'phenols', 'flavoids', 'nonflavoids', 'proanthocyanins', 'color', 'hue', 'OD', 'Proline']
+Cdata = pd.read_csv("wine.data", header=None, names=col_names)
+
+
+X = Cdata.values[:, 1:12]
+Y = Cdata.values[:,0]
+
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=100)
+#80% of data is now assigned for training data
+
+tree = DecisionTreeClassifier(criterion = "gini", random_state = 100, max_depth = 5, min_samples_leaf = 5)
+#changed the value of max_depth from 3 to 5
+tree = tree.fit(X_train, Y_train)
+
+Y_pred = tree.predict(X_test)
+
+
+print("Accuracy:",metrics.accuracy_score(Y_test, Y_pred))
+
+
+dot_data = StringIO()
+export_graphviz(tree, out_file=dot_data,
+                filled=True, rounded=True,
+                special_characters=True)
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+graph.write_png("Tree2.png")
